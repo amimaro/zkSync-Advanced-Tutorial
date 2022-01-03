@@ -1,6 +1,6 @@
-# zkSync-Tutorial
+# zkSync-Advanced Tutorial
 
-Coded Cryptozombies zkSync tutorial Lesson 17. Available at [cryptozombies.io/en/lesson/17](https://cryptozombies.io/en/lesson/17).
+Coded Cryptozombies zkSync tutorial Lesson 18. Available at [cryptozombies.io/en/lesson/18](https://cryptozombies.io/en/lesson/18).
 
 ## How to start?
 
