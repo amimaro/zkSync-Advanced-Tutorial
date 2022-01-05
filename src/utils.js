@@ -43,12 +43,11 @@ async function registerAccount(wallet, feeToken) {
   }
   console.log(`Account ${wallet.address()} registered`);
 }
-
-async function depositToZkSync(zkSyncWallet, token, amountToDeposit, ethers) {
+async function depositToZkSync(zkSyncWallet, token, amountToDeposit, tokenSet) {
   const deposit = await zkSyncWallet.depositToSyncFromEthereum({
     depositTo: zkSyncWallet.address(),
     token: token,
-    amount: ethers.utils.parseEther(amountToDeposit),
+    amount: tokenSet.parseToken(token, amountToDeposit),
   });
   try {
     await deposit.awaitReceipt();
@@ -65,14 +64,14 @@ async function transfer(
   transferFee,
   token,
   zksync,
-  ethers
+  tokenSet
 ) {
   console.log("transferFee", transferFee);
   const closestPackableAmount = zksync.utils.closestPackableTransactionAmount(
-    ethers.utils.parseEther(amountToTransfer)
+    tokenSet.parseToken(token, amountToTransfer)
   );
   const closestPackableFee = zksync.utils.closestPackableTransactionFee(
-    ethers.utils.parseEther(transferFee)
+    tokenSet.parseToken(token, transferFee)
   );
   const transfer = await from.syncTransfer({
     to: toAddress,
@@ -85,14 +84,20 @@ async function transfer(
   console.log(transferReceipt);
 }
 
-async function getFee(transactionType, address, token, zkSyncProvider, ethers) {
+async function getFee(
+  transactionType,
+  address,
+  token,
+  zkSyncProvider,
+  tokenSet
+) {
   const feeInWei = await zkSyncProvider.getTransactionFee(
     transactionType,
     address,
     token
   );
   // TODO: check why fee is not enough
-  return ethers.utils.formatEther((feeInWei.totalFee * 10).toString());
+  return tokenSet.formatToken(token, (feeInWei.totalFee * 10).toString());
 }
 
 async function withdrawToEthereum(
@@ -101,13 +106,13 @@ async function withdrawToEthereum(
   withdrawalFee,
   token,
   zksync,
-  ethers
+  tokenSet
 ) {
   const closestPackableAmount = zksync.utils.closestPackableTransactionAmount(
-    ethers.utils.parseEther(amountToWithdraw)
+    tokenSet.parseToken(token, amountToWithdraw)
   );
   const closestPackableFee = zksync.utils.closestPackableTransactionFee(
-    ethers.utils.parseEther(withdrawalFee)
+    tokenSet.parseToken(token, withdrawalFee)
   );
   const withdraw = await wallet.withdrawFromSyncToEthereum({
     ethAddress: wallet.address(),
@@ -119,25 +124,25 @@ async function withdrawToEthereum(
   console.log("ZKP verification is complete");
 }
 
-async function displayZkSyncBalance(wallet, ethers, name) {
+async function displayZkSyncBalance(wallet, tokenSet, name) {
   const state = await wallet.getAccountState();
-  if (state.committed.balances.ETH) {
+  const commitedBbalances = state.committed.balances;
+  const verifiedBalances = state.verified.balances;
+  for (const property in commitedBbalances) {
     console.log(
-      `Committed ETH balance for ${wallet.address()}(${name}): ${ethers.utils.formatEther(
-        state.committed.balances.ETH
+      `Commited ${property} balance for ${wallet.address()}(${name}): ${tokenSet.formatToken(
+        property,
+        commitedBbalances[property]
       )}`
     );
-  } else {
-    console.log(`Committed ETH balance for ${wallet.address()}(${name}): 0`);
   }
-  if (state.verified.balances.ETH) {
+  for (const property in verifiedBalances) {
     console.log(
-      `Verified ETH balance for ${wallet.address()}(${name}): ${ethers.utils.formatEther(
-        state.verified.balances.ETH
+      `Verified ${property} balance for ${wallet.address()}(${name}): ${tokenSet.formatToken(
+        property,
+        verifiedBalances[property]
       )}`
     );
-  } else {
-    console.log(`Verified ETH balance for ${wallet.address()}(${name}): 0`);
   }
 }
 

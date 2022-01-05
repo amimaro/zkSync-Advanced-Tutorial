@@ -1,12 +1,12 @@
 (async () => {
-  const ethers = require("ethers");
+  const tokenSet = require("tokenSet");
   const zksync = require("zksync");
   const utils = require("./utils");
   const SLEEP_INTERVAL = process.env.SLEEP_INTERVAL || 5000;
-  const token = "ETH";
-  const amountToDeposit = "0.05";
-  const amountToTransfer = "0.02";
-  const amountToWithdraw = "0.002";
+  const token = process.env.ZKSYNC_TOKEN || "ETH";
+  const amountToDeposit = "6.0";
+  const amountToTransfer = "2.0";
+  const amountToWithdraw = "2.0";
 
   const zkSyncProvider = await utils.getZkSyncProvider(
     zksync,
@@ -20,14 +20,8 @@
   const aliceRinkebyWallet = new ethers.Wallet(
     process.env.ALICE_PRIVATE_KEY,
     ethersProvider
-  ); // Account #78
-  console.log(`Alice's Rinkeby address is: ${aliceRinkebyWallet.address}`);
-  const aliceInitialRinkebyBalance = await aliceRinkebyWallet.getBalance();
-  console.log(
-    `Alice's initial balance on Rinkeby is: ${ethers.utils.formatEther(
-      aliceInitialRinkebyBalance
-    )}`
   );
+  console.log(`Alice's Rinkeby address is: ${aliceRinkebyWallet.address}`);
 
   console.log("Creating a zkSync wallet for Alice");
   const aliceZkSyncWallet = await utils.initAccount(
@@ -36,9 +30,22 @@
     zksync
   );
 
+  const tokenSet = zkSyncProvider.tokenSet;
+  const aliceInitialRinkebyBalance = await aliceZkSyncWallet.getEthereumBalance(
+    token
+  );
+  console.log(
+    `Alice's initial balance on Rinkeby is: ${tokenSet.formatToken(
+      token,
+      aliceInitialRinkebyBalance
+    )}`
+  );
+
+  await aliceZkSyncWallet.approveERC20TokenDeposits(token);
+
   // Display balance
   setInterval(async () => {
-    await utils.displayZkSyncBalance(aliceZkSyncWallet, ethers, "Alice");
+    await utils.displayZkSyncBalance(aliceZkSyncWallet, tokenSet, "Alice");
     console.log("---");
   }, SLEEP_INTERVAL);
 
@@ -47,9 +54,9 @@
     aliceZkSyncWallet,
     token,
     amountToDeposit,
-    ethers
+    tokenSet
   );
-  await utils.displayZkSyncBalance(aliceZkSyncWallet, ethers);
+  await utils.displayZkSyncBalance(aliceZkSyncWallet, tokenSet);
   await utils.registerAccount(aliceZkSyncWallet, token);
 
   console.log("Transferring");
@@ -58,7 +65,7 @@
     aliceRinkebyWallet.address,
     token,
     zkSyncProvider,
-    ethers
+    tokenSet
   );
   await utils.transfer(
     aliceZkSyncWallet,
@@ -67,7 +74,7 @@
     transferFee,
     token,
     zksync,
-    ethers
+    tokenSet
   );
 
   console.log("Withdrawing");
@@ -76,7 +83,7 @@
     aliceRinkebyWallet.address,
     token,
     zkSyncProvider,
-    ethers
+    tokenSet
   );
   await utils.withdrawToEthereum(
     aliceZkSyncWallet,
@@ -84,6 +91,6 @@
     withdrawalFee,
     token,
     zksync,
-    ethers
+    tokenSet
   );
 })();
