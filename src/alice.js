@@ -1,5 +1,5 @@
 (async () => {
-  const tokenSet = require("tokenSet");
+  const ethers = require("ethers");
   const zksync = require("zksync");
   const utils = require("./utils");
   const SLEEP_INTERVAL = process.env.SLEEP_INTERVAL || 5000;
