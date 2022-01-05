@@ -38,7 +38,7 @@
   );
 
   setInterval(async () => {
-    await utils.displayZkSyncBalance(bobZkSyncWallet, ethers, "Bob");
+    await utils.displayZkSyncBalance(bobZkSyncWallet, tokenSet, "Bob");
     console.log("---");
   }, SLEEP_INTERVAL);
 })();
