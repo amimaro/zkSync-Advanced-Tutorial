@@ -18,7 +18,6 @@
     process.env.BOB_PRIVATE_KEY,
     ethersProvider
   );
-  const tokenSet = zkSyncProvider.tokenSet;
 
   console.log(`Bob's Rinkeby address is: ${bobRinkebyWallet.address}`);
   const bobZkSyncWallet = await utils.initAccount(
@@ -26,9 +25,15 @@
     zkSyncProvider,
     zksync
   );
+
+  const tokenSet = zkSyncProvider.tokenSet;
+  const bobInitialRinkebyBalance = await bobZkSyncWallet.getEthereumBalance(
+    token
+  );
   console.log(
-    `Bob's initial balance on Rinkeby is: ${await bobZkSyncWallet.getEthereumBalance(
-      token
+    `Bob's initial balance on Rinkeby is: ${tokenSet.formatToken(
+      token,
+      bobInitialRinkebyBalance
     )}`
   );
 
