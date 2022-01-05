@@ -8,6 +8,8 @@
   const amountToTransfer = "2.0";
   const amountToWithdraw = "2.0";
 
+  console.log(`Selected token: ${token}`);
+
   const zkSyncProvider = await utils.getZkSyncProvider(
     zksync,
     process.env.NETWORK_NAME
